@@ -1,4 +1,4 @@
-# Maze Game
+# Maze 
 
 This is a simple maze game created using Python and Pygame.
 
@@ -21,12 +21,13 @@ Run the following command to install pip:
 
 ```bash
 python get-pip.py
+```
 
 After installation, verify that pip was installed by running:
 
 ```bash
 pip --version
-
+```
 ### Prerequisites
 
 Make sure you have Python installed on your system. You can download Python from the [official website](https://www.python.org/downloads/).
@@ -39,3 +40,4 @@ Make sure you have Python installed on your system. You can download Python from
 
    ```bash
    pip install pygame
+   ```
