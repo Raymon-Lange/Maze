@@ -1,8 +1,9 @@
 import pygame
-import sys
+import sys, os
 import random, time
 from backTrackingGen import BackTrackingGen
 from backTrackingSolve import backTrackingSolve
+from TremauxsSolve import TremauxsSolve
 
 
 class MazeSolver:
@@ -41,6 +42,8 @@ class MazeSolver:
         self.PAUSE = 4
         self.currentState = self.BUILD
 
+        self.loadAssets()
+
     def resetMaze(self):
         self.maze = [[0 for _ in range(self.mazeWidth)] for _ in range(self.mazeHeight)]
         self.displayMaze = [[0 for _ in range(self.mazeWidth)] for _ in range(self.mazeHeight)]
@@ -72,8 +75,8 @@ class MazeSolver:
     def creatStartAndEnd(self):
         found = False
         while not found :
-            pX = random.randrange(self.mazeHeight/2, self.mazeHeight)
-            pY = random.randrange(self.mazeWidth/2, self.mazeWidth)
+            pX = random.randrange(int(self.mazeHeight/2), self.mazeHeight)
+            pY = random.randrange(int(self.mazeWidth/2), self.mazeWidth)
 
             if self.maze[pX][pY] == 1:
                 self.endPos = (pX, pY)
@@ -81,30 +84,59 @@ class MazeSolver:
 
         found = False
         while not found :
-            pX = random.randrange(1, self.mazeHeight/2)
-            pY = random.randrange(1, self.mazeWidth/2)
+            pX = random.randrange(1, int(self.mazeHeight/2))
+            pY = random.randrange(1, int(self.mazeWidth/2))
 
             if self.maze[pX][pY] == 1:
                 self.startPos = (pX, pY)
                 found = True
+
+    def drawMenu(self):
+        pygame.draw.rect(self.screen, self.black, pygame.Rect(20, 20, 300, 300),  2, 10)
+        pygame.draw.rect(self.screen, self.white, pygame.Rect(20, 20, 298, 298))
+
+        self.drawText(self.screen, "Generation: \n Back tracking ", self.black, 150,40)
+
+        self.drawText(self.screen, "Solving  \n Tremauxs ", self.black, 110,80)
+
+        cells = f'Cells explored \n{self.explored}'
+        self.drawText(self.screen, cells, self.black ,150, 120)
+
+        cells = f'Shortest path \n{self.shortestPath}'
+        self.drawText(self.screen, cells, self.black ,140, 170)
+
+    def drawText(self, surface, text, color, x, y):
+            text_surface = self.font.render(text, True, color)
+            text_rect = text_surface.get_rect()
+            text_rect.center = (x, y)
+            surface.blit(text_surface, text_rect)
+
+    def loadAssets(self):
+        # Create pointers to directories 
+        self.assets_dir = os.path.join("assets")
+        self.font_dir = os.path.join(self.assets_dir, "font")
+        self.font= pygame.font.Font(os.path.join(self.font_dir, "PressStart2P-vaV7.ttf"), 16)
     
     def main(self):
 
         # Generate the maze just once
         gen = BackTrackingGen(self.mazeHeight, self.mazeWidth)
+    
         steps = gen.generate(self.maze)
         steps.reverse()
 
         self.creatStartAndEnd()
 
-        print("Start " , self.startPos)
-        print("End " , self.endPos)
-
-        solve = backTrackingSolve(self.maze)
+        solve = TremauxsSolve(self.maze)
         pathFound = solve.solve(self.startPos, self.endPos)
         path = solve.path
         wasHere = solve.wasHere
         wasHere.reverse()
+
+        self.explored =  len(wasHere)
+        self.shortestPath = len(path)
+
+        count = 1000
 
         running = True
         while running:
@@ -124,6 +156,9 @@ class MazeSolver:
             elif len(path) > 0:
                 step = path.pop()
                 self.displayMaze[step[0]][step[1]] = 3
+            elif count > 0:
+                count -= 1
+                self.currentState = self.END
             else:
                 time.sleep(1)
                 self.resetMaze()
@@ -135,9 +170,17 @@ class MazeSolver:
                 path = solve.path
                 wasHere = solve.wasHere
                 wasHere.reverse()
+                self.explored =  len(wasHere)
+                self.shortestPath = len(path)
+
+                self.currentState = self.BUILD
+                count = 1000
     
             # Draw the maze
             self.drawMaze()
+
+            if self.currentState == self.END:
+                self.drawMenu()
 
             # Update the display
             pygame.display.flip()
