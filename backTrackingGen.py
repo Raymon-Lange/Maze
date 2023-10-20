@@ -16,14 +16,6 @@ class BackTrackingGen:
         def isInside(x, y):
             return 0 <= x < self.width-2 and 0 <= y < self.height-2
 
-        # Helper function to check if a cell is a wall and has unvisited neighbors
-        def hasUnvisitedNeighbor(x, y):
-            count = 0
-            for dx, dy in directions:
-                nx, ny = x + dx, y + dy
-                if isInside(nx, ny) and maze[ny][nx] == 0:
-                    count += 1
-            return count > 0
 
         while stack:
             x, y = stack[-1]  # Current cell
