@@ -24,44 +24,43 @@ class TremauxsSolve:
         openSpace  = 0
 
         if x != 0 :
-            if self.maze[x-1][y] != 1: 
+            if self.maze[x-1][y] != 0: 
                 openSpace +=1 
             
         if x != self.height-1 :
-            if self.maze[x-1][y] != 1: 
+            if self.maze[x+1][y] != 0: 
                 openSpace +=1
             
         if y != self.width-1 :
-            if self.maze[x][y+1] != 1: 
+            if self.maze[x][y+1] != 0: 
                 openSpace +=1
 
         if y != 0 :
-            if self.maze[x][y-1] != 1: 
+            if self.maze[x][y-1] != 0: 
                 openSpace +=1
 
-        if openSpace >= 2:
+        if openSpace > 2:
             return True
             
         return False 
         
-
         #If all direction are dead return true
     def isDedend(self,x,y):
             totalWall = 0
             if x != 0 :
-                if self.maze[x-1][y] == 1: 
+                if self.maze[x-1][y] == 0: 
                     totalWall +=1 
             
             if x != self.height-1 :
-                if self.maze[x-1][y] == 1: 
+                if self.maze[x+1][y] == 0: 
                     totalWall +=1 
             
             if y != self.width-1 :
-                if self.maze[x][y+1] == 1: 
+                if self.maze[x][y+1] == 0: 
                     totalWall +=1 
 
             if y != 0 :
-                if self.maze[x][y-1] == 1: 
+                if self.maze[x][y-1] == 0: 
                     totalWall +=1 
 
             #if we can't move any direction, the point behind us should be open 
@@ -71,74 +70,127 @@ class TremauxsSolve:
             
             return False
     
-    def goBackToLastJuction(self):
-        lastJunction = self.junctions[len(self.junctions)]
+    def goBackToLastJuctionOne(self):
 
+        if len(self.junctions) == 0:
+            print("No junctions in the list")
+            return 
+        
+        self.junctions.pop()
+        lastJunction = self.junctions[len(self.junctions)-1]
 
         isJuction = False
 
         while not isJuction:
 
+            if len(self.path) == 0:
+                print("Path is empty")
+                return
+
             backStep = self.path.pop() 
 
             if lastJunction == backStep:
                 isJuction = True
+                self.path.append(backStep)
+                print("went back to ",backStep)
             else:
-                self.maze[backStep[0]][backStep[1]] = 1
+                print("not at junction keep going back")
+                self.maze[backStep[0]][backStep[1]] = 0
 
+    def goBackToLastJuction(self):
+        lastJunction = self.junctions.pop()
+
+        isJuction = False
+
+        while not isJuction:
+
+            if len(self.path) == 0:
+                print("Path is empty")
+                return
+
+            backStep = self.path.pop() 
+
+            if lastJunction == backStep:
+                isJuction = True
+                self.path.append(self.junctions[len(self.junctions)-1])
+                print("went back to ",backStep)
+            else:
+                print("not the junction keep going back")
+                self.maze[backStep[0]][backStep[1]] = 0             
+
+    # Helper function to check if a cell is within the maze boundaries
+    def isInside(self, x, y):
+        return 0 <= x < self.width-1 and 0 <= y < self.height-1
                 
-        
-    def solve(self, start, end):
+    def  solve(self, start, end):
             self.start = start
             self.end = end
 
-            found = False 
+            print("Start ", start)
 
             #Add the start
             self.wasHere.append(self.start)
             self.path.append(self.start)
 
-            count = 0 
+            found = False 
+
+            previousDirection = None
+            maxStep = 1000
+            steps =0
 
             while not found:
-                direction = self.directions[random.randint(0,3)]
-                currentPos = self.wasHere[len(self.wasHere)-1]
-                x = currentPos[0] + direction[0]
-                y = currentPos[1] + direction[1]
+                    x,y = self.path[len(self.path)-1]
+                    #STEP: if previousDirection is none pick a new random direction 
+                    neighbors = [(x + dx, y + dy) for dx, dy in self.directions if self.isInside(x + dx, y + dy)]
+                    print("Has neighbors", neighbors)
 
-                if end[0] == x and end[1] == y:
-                    found = True
-                    self.path.append((x,y))
-                    return True
+                    unvisited_neighbors = [neighbor for neighbor in neighbors if self.maze[neighbor[1]][neighbor[0]] != 0 and neighbor not in self.wasHere ]
 
+                    print("unvisited neighbors", unvisited_neighbors)
 
-                if self.maze[x][y] != 1 and (x,y) in self.wasHere:
-                    
-                    if self.isJunction(x,y):
- 
-                        if (x,y) in self.junctions:
-                        #Get the last  postion i came from and mark in as wall 
-                            point = self.wasHere.pop()
-                            self.maze[point[0]][point[1]] = 1
-                        
-                            self.goBackToLastJuction()
-                        else: 
-                            #add the junction to the list of junctions 
-                            self.junctions.append((x,y))
+                    if unvisited_neighbors:
+                        print(len(unvisited_neighbors)," neighbors open")
 
-                    elif self.isDeadEnd():
-                        self.goBackToLastJuction()
-
+                        #STEP: We have more than option we are at junction 
+                        if len(unvisited_neighbors) > 1:
+                            self.junctions += unvisited_neighbors
+                            x,y = self.junctions[len(self.junctions)-1]
+                            print(self.junctions)
+                        else:
+                            x,y = unvisited_neighbors[0] 
+                    #STEP: No neightbors go back to last junction   
                     else:
-                        self.wasHere.append((x,y))
-                        self.path.append((x,y))
-
-                count += 1
-                if count > 100:
-                    return False
+                            #STEP: We found a dead end go back to last junction
+                            self.maze[x][y] = 0
+                            self.wasHere.append((x,y))
+                            if len(self.junctions) != 0:
+                                self.path.append(self.junctions.pop())
+                            else:
+                                print("Crap i failed")
+                                return False
+                            previousDirection = None
+                            print("No options going back")
+                            continue
 
                     
+                    #STEP: Did we find the end of the maze
+                    if end[0] == x and end[1] == y:
+                        found = True
+                        print("found path")
+                        return True
+                    
+                    print(x,y, "is a open cell")
+                    #STEP: We have a valid space to be in, move forward
+                    self.wasHere.append((x,y))
+                    self.path.append((x,y))
+                    
+                    steps += 1
+                    if steps > maxStep:
+                        print("Failed to find exit")
+                        return False
 
+                    
+                    
 
 
                     

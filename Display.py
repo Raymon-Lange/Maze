@@ -138,7 +138,7 @@ class MazeSolver:
         self.explored =  len(wasHere)
         self.shortestPath = len(path)
 
-        count = 100
+        count = 100000
 
         running = True
         while running:
