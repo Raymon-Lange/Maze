@@ -136,7 +136,7 @@ class MazeSolver:
         self.explored =  len(wasHere)
         self.shortestPath = len(path)
 
-        count = 100000
+        count = 1000
 
         running = True
         while running:
@@ -160,8 +160,6 @@ class MazeSolver:
                 count -= 1
                 self.currentState = self.END
             else:
-                running = False
-                time.sleep(1)
                 self.resetMaze()
                 steps = gen.generate(self.maze)
 
@@ -182,7 +180,7 @@ class MazeSolver:
 
             if self.currentState == self.END:
                 pass
-                #self.drawMenu()
+                self.drawMenu()
 
             # Update the display
             pygame.display.flip()

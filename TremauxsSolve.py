@@ -45,13 +45,10 @@ class TremauxsSolve:
                     unvisited_neighbors = [neighbor for neighbor in neighbors if self.maze[neighbor[0]][neighbor[1]] != 0 and neighbor not in self.wasHere ]
 
                     if unvisited_neighbors:
-                        print(len(unvisited_neighbors)," neighbors open")
-
                         #STEP: We have more than option we are at junction 
                         if len(unvisited_neighbors) > 1:
                             self.junctions += unvisited_neighbors
                             x,y = self.junctions.pop()
-                            print(self.junctions)
                         else:
                             x,y = unvisited_neighbors[0] 
                     #STEP: No neightbors go back to last junction   
