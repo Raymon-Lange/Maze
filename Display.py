@@ -121,6 +121,7 @@ class MazeSolver:
 
         # Generate the maze just once
         gen = BackTrackingGen(self.mazeHeight, self.mazeWidth)
+        clock = pygame.time.Clock()
     
         steps = gen.generate(self.maze)
         steps.reverse()
@@ -136,10 +137,11 @@ class MazeSolver:
         self.explored =  len(wasHere)
         self.shortestPath = len(path)
 
-        count = 1000
+        count = 10
 
         running = True
         while running:
+            clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -173,7 +175,7 @@ class MazeSolver:
                 self.shortestPath = len(path)
 
                 self.currentState = self.BUILD
-                count = 1000
+                count = 20
     
             # Draw the maze
             self.drawMaze()
