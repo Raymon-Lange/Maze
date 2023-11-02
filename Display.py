@@ -4,6 +4,7 @@ import random, time
 from backTrackingGen import BackTrackingGen
 from backTrackingSolve import backTrackingSolve
 from TremauxsSolve import TremauxsSolve
+from aStarSolve import AstarSolve
 
 
 class MazeSolver:
@@ -128,8 +129,11 @@ class MazeSolver:
 
         self.creatStartAndEnd()
 
-        solve = TremauxsSolve(self.maze)
+        solve = AstarSolve(self.maze)
         pathFound = solve.solve(self.startPos, self.endPos)
+
+        print(pathFound)
+
         path = solve.path
         wasHere = solve.wasHere
         wasHere.reverse()
@@ -137,11 +141,11 @@ class MazeSolver:
         self.explored =  len(wasHere)
         self.shortestPath = len(path)
 
-        count = 10
+        count = 100
 
         running = True
         while running:
-            clock.tick(60)
+            clock.tick(120)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -175,7 +179,7 @@ class MazeSolver:
                 self.shortestPath = len(path)
 
                 self.currentState = self.BUILD
-                count = 20
+                count = 100
     
             # Draw the maze
             self.drawMaze()
