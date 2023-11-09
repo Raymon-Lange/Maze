@@ -32,7 +32,6 @@ class AstarSolve:
                  #STEP: Check if we are at the goal
                 if current == end:
                     while current in cameFrom:
-                        print(current)
                         self.path.append(current)
                         current = cameFrom[current]
                     
